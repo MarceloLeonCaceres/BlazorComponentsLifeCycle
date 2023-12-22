@@ -1,0 +1,42 @@
+﻿@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.SplitButtons
+
+@using BTCascadingState.Components
+
+@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h2>Hello, world!</h2>
+
+<ToolBarAuxiliar />
+<SelectorEmpleados />
+
+@code {
+    protected override void OnInitialized()
+    {
+        Debug.WriteLine("Index OnInitialized");
+    }
+
+    protected override void OnParametersSet()
+    {
+        Debug.WriteLine("Index OnInitialized");
+        base.OnParametersSet();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Debug.WriteLine("Index OnAfterRender firstRender");
+        }
+        else
+        {
+            Debug.WriteLine("Index OnAfterRender NO firstRender");
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+
+
+}

@@ -1,0 +1,59 @@
+﻿
+<p>
+    Desde:
+    &nbsp;
+    <SfDatePicker Width="125px" FirstDayOfWeek="1" @bind-Value="fDesde" Format="dd/MM/yyyy" >
+        <DatePickerEvents TValue="DateTime" ValueChange="UpdateDesde"></DatePickerEvents>
+    </SfDatePicker>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    Hasta:
+    &nbsp;
+    <SfDatePicker Width="125px" FirstDayOfWeek="1" @bind-Value="fHasta" Format="dd/MM/yyyy">
+        <DatePickerEvents TValue="DateTime" ValueChange="UpdateHasta"></DatePickerEvents>
+    </SfDatePicker>
+</p>
+
+@code {
+
+    [CascadingParameter]
+    public CascadingAppState AppState { get; set; }
+
+    public DateTime fDesde;
+    public DateTime fHasta;
+
+    protected override void OnInitialized()
+    {
+        fDesde = AppState.dDesde;
+        fHasta = AppState.dHasta;
+        Debug.WriteLine("ToolbarAuxiliar OnInitialized");
+    }
+
+    protected override void OnParametersSet()
+    {
+        Debug.WriteLine("ToolbarAuxiliar OnInitialized");
+        base.OnParametersSet();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Debug.WriteLine("ToolbarAuxiliar OnAfterRender firstRender");
+        }
+        else
+        {
+            Debug.WriteLine("ToolbarAuxiliar OnAfterRender NO firstRender");
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+    void UpdateHasta()
+    {
+        AppState.SetProperty(this, "dHasta", fHasta);
+    }
+    void UpdateDesde()
+    {
+        AppState.SetProperty(this, "dDesde", fDesde);
+    }
+
+}

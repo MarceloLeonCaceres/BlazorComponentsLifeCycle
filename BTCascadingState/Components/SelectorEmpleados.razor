@@ -1,0 +1,130 @@
+﻿@using Syncfusion.Blazor.SplitButtons
+@using BTCascadingState.Models
+
+
+<div id="container">
+    <SfGrid @ref="Grid" DataSource="@Empleados" TValue="EmpleadoBaseModel" RowHeight="28"
+            AllowSelection="true" AllowPaging="false" AllowSorting="true" AllowFiltering="true">        
+        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+        <GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+        <GridEvents RowSelected="RowSelectHandler" RowDeselected="RowDeselectHandler" TValue="EmpleadoBaseModel" OnActionComplete="Complete"></GridEvents>
+        <GridColumns>
+            <GridColumn Type="ColumnType.CheckBox" Width="50">
+                <HeaderTemplate> 
+                    <SfDropDownButton> 
+                        <DropDownButtonEvents ItemSelected="OnSelected"></DropDownButtonEvents> 
+                        <DropDownMenuItems> 
+                            <DropDownMenuItem Text="Seleccionar Empleados Visibles"></DropDownMenuItem> 
+                            <DropDownMenuItem Text="Seleccionar Todo"></DropDownMenuItem> 
+                            <DropDownMenuItem Text="Quitar selección"></DropDownMenuItem> 
+                        </DropDownMenuItems> 
+                    </SfDropDownButton> 
+                </HeaderTemplate>
+            </GridColumn>
+            <GridColumn Field="@nameof(EmpleadoBaseModel.UserId)" IsPrimaryKey="true" Visible="false"></GridColumn>
+            <GridColumn Field="@nameof(EmpleadoBaseModel.Badge)" HeaderText="Cod" Width="95px"></GridColumn>
+            <GridColumn Field="@nameof(EmpleadoBaseModel.NombreEmp)" HeaderText="Empleado" Width="235px"></GridColumn>
+            <GridColumn Field="@nameof(EmpleadoBaseModel.Departamento)" HeaderText="Departamento" Width="185px"></GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>
+<div>
+    <span>Usuarios seleccionados: @RowCountSelected.ToString()</span>
+</div>
+
+@code {
+
+    private SfGrid<EmpleadoBaseModel> Grid { get; set; }
+
+    public List<EmpleadoBaseModel> Empleados { get; set; }
+
+    // [CascadingParameter]
+    // protected AdminModel perfil { get; set; }
+
+    [Parameter]
+    public int otAdmin {get;set;}
+
+    [Parameter]
+    public int idDepto {get;set;}
+
+    [Parameter]
+    public int idAdmin {get;set;}
+
+    [Parameter]
+    public EventCallback<List<int>> UsersSelected { get; set; }
+
+    public bool IsSelectAll { get; set; }
+
+    private int RowCountSelected { get; set; }
+
+    public async Task UpdateSelectedUsers()
+    {
+        List<int> ItemsSelected = new List<int>();
+        var SelectedRecords = await Grid.GetSelectedRecords();
+        RowCountSelected = SelectedRecords.Count();
+        foreach (var fila in SelectedRecords)
+        {
+            ItemsSelected.Add((int)fila.UserId);
+        }
+        await UsersSelected.InvokeAsync(ItemsSelected);
+    }
+
+    public async Task Complete(ActionEventArgs<EmpleadoBaseModel> Args)
+    {
+        if(Args.RequestType == Syncfusion.Blazor.Grids.Action.Paging && IsSelectAll)
+        {
+            var CurrentViewRecords = await Grid.GetCurrentViewRecords();
+            await Grid.SelectRowsByRange(0, CurrentViewRecords?.Count - 1);
+        }
+    }
+
+    public async Task OnSelected(MenuEventArgs Args)
+    {
+        if(Args.Item.Text == "Seleccionar Empleados Visibles")
+        {
+            IsSelectAll = false;
+            var CurrentViewRecords = await Grid.GetCurrentViewRecords();
+            await Grid.SelectRowsByRange(0, CurrentViewRecords?.Count - 1);
+        }
+        else if(Args.Item.Text == "Seleccionar Todo")
+        {
+            IsSelectAll = true;
+            await Grid.SelectRowsByRange(0, Empleados?.Count - 1);
+        }
+        else if(Args.Item.Text == "Quitar selección")
+        {
+            await Grid.ClearSelection();
+        }
+    }
+
+    public async Task RowSelectHandler(RowSelectEventArgs<EmpleadoBaseModel> args)
+    {
+        await UpdateSelectedUsers();
+    }
+    public async void RowDeselectHandler(RowDeselectEventArgs<EmpleadoBaseModel> args)
+    {
+        await UpdateSelectedUsers();
+    }
+    protected override void OnInitialized()
+    {
+        Empleados = new List<EmpleadoBaseModel>{
+            new EmpleadoBaseModel { UserId= 1, Badge= "1", NombreEmp="Juan", DeptId=1, Departamento="Finanzas" },
+            new EmpleadoBaseModel { UserId= 2, Badge= "2", NombreEmp="Jorge", DeptId=1, Departamento="Finanzas" },
+            new EmpleadoBaseModel { UserId= 3, Badge= "3", NombreEmp="José", DeptId=1, Departamento="RRHH" },
+            new EmpleadoBaseModel { UserId= 4, Badge= "4", NombreEmp="María", DeptId=1, Departamento="RRHH" },
+            new EmpleadoBaseModel { UserId= 5, Badge= "5", NombreEmp="Peter", DeptId=1, Departamento="Finanzas" },
+            new EmpleadoBaseModel { UserId= 6, Badge= "6", NombreEmp="Rober", DeptId=1, Departamento="Finanzas" },
+        };
+        
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            IsSelectAll = true;    
+            await Grid.SelectRowsByRange(0, Empleados?.Count - 1);
+        }        
+    }
+}
